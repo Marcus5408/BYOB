@@ -78,7 +78,7 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
-                if event.type == pygame.MOUSEBUTTONDOWN and not self.replaying:
+                if event.type == pygame.MOUSEBUTTONDOWN and self.replaying:
                     x, y = event.pos
                     print(f"Mouse clicked at: {x}, {y}")  # Debug print
                     self.barrier.place(x, y, 50, 10)
