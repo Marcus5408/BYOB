@@ -61,7 +61,7 @@ class Game:
     def __init__(self):
         self.screenSize = (800, 600)
         self.screen = pygame.display.set_mode(self.screenSize)
-        pygame.display.set_caption("Game Making Toolkit")
+        pygame.display.set_caption("BYOB Alpha")
         self.clock = pygame.time.Clock()
         self.running = True
         self.square = Square(400, 50, 50)
@@ -80,8 +80,10 @@ class Game:
                     self.running = False
                 if event.type == pygame.MOUSEBUTTONDOWN and not self.replaying:
                     x, y = event.pos
+                    print(f"Mouse clicked at: {x}, {y}")  # Debug print
                     self.barrier.place(x, y, 50, 10)
-
+                    print(f"Barrier placed at: {self.barrier.rect}")  # Debug print
+    
             if not self.replaying:
                 self.square.handle_keys()
                 self.square.update()
@@ -92,31 +94,31 @@ class Game:
                     self.replay_index += 1
                 else:
                     self.running = False
-
+    
             if self.square.rect.colliderect(self.platform.rect):
                 self.square.rect.bottom = self.platform.rect.top
                 self.square.velocity = 0
-
+    
             if self.square.rect.top > self.screenSize[1]:
                 self.square.rect.x = (self.screenSize[0] // 2) - (self.square.rect.width // 2)
                 self.square.rect.y = (self.screenSize[1] // 2) - (self.square.rect.height // 2)
                 self.square.velocity = 0
-
+    
             if self.square.rect.colliderect(self.goal.rect) and not self.replaying:
                 self.replaying = True
                 self.square.rect.x, self.square.rect.y = self.positions[0]
                 self.replay_index = 0
-
+    
             if self.square.rect.colliderect(self.barrier.rect):
                 self.running = False
-
+    
             self.screen.fill((0, 0, 0))
             self.square.draw(self.screen)
             self.platform.draw(self.screen)
             self.goal.draw(self.screen)
             self.barrier.draw(self.screen)
             pygame.display.flip()
-
+    
         pygame.quit()
 
 if __name__ == "__main__":
