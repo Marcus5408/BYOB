@@ -72,54 +72,65 @@ class Game:
         self.replaying = False
         self.replay_index = 0
 
+    def reset_game(self):
+        self.square = Square(400, 50, 50)
+        self.platform = Platform(300, 500, 300, 10)
+        self.goal = Goal(self.screenSize[0] - 70, 450, 50)
+        self.positions = []
+        self.replaying = False
+        self.replay_index = 0
+
     def run(self):
-        while self.running:
-            self.clock.tick(60)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                if event.type == pygame.MOUSEBUTTONDOWN and self.replaying:
-                    x, y = event.pos
-                    print(f"Mouse clicked at: {x}, {y}")  # Debug print
-                    self.barrier.place(x, y, 50, 10)
-                    print(f"Barrier placed at: {self.barrier.rect}")  # Debug print
-    
-            if not self.replaying:
-                self.square.handle_keys()
-                self.square.update()
-                self.positions.append((self.square.rect.x, self.square.rect.y))
-            else:
-                if self.replay_index < len(self.positions):
-                    self.square.rect.x, self.square.rect.y = self.positions[self.replay_index]
-                    self.replay_index += 1
+        while True:  # Infinite loop to rerun the game
+            self.running = True
+            while self.running:
+                self.clock.tick(60)
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        return
+                    if event.type == pygame.MOUSEBUTTONDOWN and self.replaying:
+                        x, y = event.pos
+                        print(f"Mouse clicked at: {x}, {y}")  # Debug print
+                        self.barrier.place(x, y, 50, 10)
+                        print(f"Barrier placed at: {self.barrier.rect}")  # Debug print
+
+                if not self.replaying:
+                    self.square.handle_keys()
+                    self.square.update()
+                    self.positions.append((self.square.rect.x, self.square.rect.y))
                 else:
+                    if self.replay_index < len(self.positions):
+                        self.square.rect.x, self.square.rect.y = self.positions[self.replay_index]
+                        self.replay_index += 1
+                    else:
+                        self.running = False
+
+                if self.square.rect.colliderect(self.platform.rect):
+                    self.square.rect.bottom = self.platform.rect.top
+                    self.square.velocity = 0
+
+                if self.square.rect.top > self.screenSize[1]:
+                    self.square.rect.x = (self.screenSize[0] // 2) - (self.square.rect.width // 2)
+                    self.square.rect.y = (self.screenSize[1] // 2) - (self.square.rect.height // 2)
+                    self.square.velocity = 0
+
+                if self.square.rect.colliderect(self.goal.rect) and not self.replaying:
+                    self.replaying = True
+                    self.square.rect.x, self.square.rect.y = self.positions[0]
+                    self.replay_index = 0
+
+                if self.square.rect.colliderect(self.barrier.rect):
                     self.running = False
-    
-            if self.square.rect.colliderect(self.platform.rect):
-                self.square.rect.bottom = self.platform.rect.top
-                self.square.velocity = 0
-    
-            if self.square.rect.top > self.screenSize[1]:
-                self.square.rect.x = (self.screenSize[0] // 2) - (self.square.rect.width // 2)
-                self.square.rect.y = (self.screenSize[1] // 2) - (self.square.rect.height // 2)
-                self.square.velocity = 0
-    
-            if self.square.rect.colliderect(self.goal.rect) and not self.replaying:
-                self.replaying = True
-                self.square.rect.x, self.square.rect.y = self.positions[0]
-                self.replay_index = 0
-    
-            if self.square.rect.colliderect(self.barrier.rect):
-                self.running = False
-    
-            self.screen.fill((0, 0, 0))
-            self.square.draw(self.screen)
-            self.platform.draw(self.screen)
-            self.goal.draw(self.screen)
-            self.barrier.draw(self.screen)
-            pygame.display.flip()
-    
-        pygame.quit()
+
+                self.screen.fill((0, 0, 0))
+                self.square.draw(self.screen)
+                self.platform.draw(self.screen)
+                self.goal.draw(self.screen)
+                self.barrier.draw(self.screen)
+                pygame.display.flip()
+
+            self.reset_game()
 
 if __name__ == "__main__":
     pygame.init()
